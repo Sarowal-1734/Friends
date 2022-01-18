@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -55,21 +54,16 @@ class UserFragment : Fragment() {
             this.findNavController().navigate(direction)
         }
 
-        // Show or Hide paginationProgressBar
-        viewModel.isLoading().observe(viewLifecycleOwner, {
-            binding.paginationProgressBar.isVisible = it
-        })
-
         viewModel.users.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
-                    hideMainProgressBar()
+                    hideProgressBar()
                     response.data?.let { userResponse ->
                         userAdapter.differ.submitList(userResponse.results.toList())
                     }
                 }
                 is Resource.Error -> {
-                    hideMainProgressBar()
+                    hideProgressBar()
                     response.message?.let { message ->
                         Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
                     }
@@ -77,20 +71,30 @@ class UserFragment : Fragment() {
                 is Resource.Loading -> {
                     showMainProgressBar()
                 }
+                is Resource.Paginating -> {
+                    showPaginationProgressBar()
+                }
             }
         })
 
         return binding.root
     }
 
-    // hide initial progressBar
-    private fun hideMainProgressBar() {
-        binding.initialProgressBar.visibility = View.INVISIBLE
+    // hide progressBar
+    private fun hideProgressBar() {
+        binding.initialProgressBar.visibility = View.GONE
+        binding.paginationProgressBar.visibility = View.GONE
+
     }
 
     // show initial progressBar
     private fun showMainProgressBar() {
         binding.initialProgressBar.visibility = View.VISIBLE
+    }
+
+    // show pagination progressBar
+    private fun showPaginationProgressBar() {
+        binding.paginationProgressBar.visibility = View.VISIBLE
     }
 
     // Pagination

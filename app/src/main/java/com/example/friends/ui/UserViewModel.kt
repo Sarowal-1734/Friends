@@ -7,7 +7,6 @@ import android.net.ConnectivityManager.*
 import android.net.NetworkCapabilities.*
 import android.os.Build
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.friends.UserApplication
@@ -28,9 +27,6 @@ class UserViewModel(
     var usersPageNumber = 1
     var usersPageResponse: UserResponse? = null
 
-    // Show/Hide paginationProgressBar
-    private val isLoading = MutableLiveData<Boolean>()
-
     // Initially load 10 user
     init {
         getUsers()
@@ -47,8 +43,7 @@ class UserViewModel(
         if (usersPageNumber == 1) {
             users.postValue(Resource.Loading())
         } else {
-            // load next 10 user
-            isLoading.value = true
+            users.postValue(Resource.Paginating())
         }
         try {
             if (hasInternetConnection()) {
@@ -69,7 +64,6 @@ class UserViewModel(
                 else -> users.postValue(Resource.Error("Conversion error"))
             }
         }
-        isLoading.value = false
     }
 
     private fun handleResponse(response: Response<UserResponse>): Resource<UserResponse> {
@@ -116,10 +110,5 @@ class UserViewModel(
             }
         }
         return false
-    }
-
-    // Show/Hide paginationProgressBar
-    fun isLoading(): LiveData<Boolean> {
-        return isLoading
     }
 }
