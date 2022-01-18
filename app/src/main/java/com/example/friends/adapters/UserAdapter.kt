@@ -1,46 +1,44 @@
 package com.example.friends.adapters
 
-import Results
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.friends.R
-import com.example.friends.ui.fragments.user.UserFragmentDirections
+import com.example.friends.models.Result
 
 class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
-    private val diffCallBack = object : DiffUtil.ItemCallback<Results>() {
-        override fun areItemsTheSame(oldItem: Results, newItem: Results): Boolean {
+    inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val imageViewPortrait: ImageView = itemView.findViewById(R.id.imageViewPortrait)
+        val textViewTitle: TextView = itemView.findViewById(R.id.textViewUserName)
+        val textViewCountry: TextView = itemView.findViewById(R.id.textViewCountry)
+    }
+
+    private val differCallback = object : DiffUtil.ItemCallback<Result>() {
+        override fun areItemsTheSame(oldItem: Result, newItem: Result): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: Results, newItem: Results): Boolean {
+        override fun areContentsTheSame(oldItem: Result, newItem: Result): Boolean {
             return oldItem == newItem
         }
     }
-
-    private val differ = AsyncListDiffer(this, diffCallBack)
-    var results: List<Results>
-        get() = differ.currentList
-        set(value) {
-            differ.submitList(value)
-        }
-
+    val differ = AsyncListDiffer(this, differCallback)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        val itemView: View =
-            LayoutInflater.from(parent.context).inflate(R.layout.row_item_user, parent, false)
-        return UserViewHolder(itemView)
+        return UserViewHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.row_item_user, parent, false)
+        )
     }
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
-        val result = results[position]
+        val result = differ.currentList[position]
         holder.apply {
             // Get and set username
             val title = result.name.title
@@ -55,20 +53,18 @@ class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
             val portrait = result.picture.large
             Glide.with(holder.itemView.context).load(portrait).into(imageViewPortrait)
         }
-        holder.itemView.setOnClickListener(View.OnClickListener {
-            val direction = UserFragmentDirections.actionUserFragmentToUserDetailsFragment(result)
-            it.findNavController().navigate(direction)
-        })
+        holder.itemView.setOnClickListener {
+            onItemClickListener?.let { it(result) }
+        }
     }
 
     override fun getItemCount(): Int {
-        return results.size
+        return differ.currentList.size
     }
 
-    inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageViewPortrait: ImageView = itemView.findViewById(R.id.imageViewPortrait)
-        val textViewTitle: TextView = itemView.findViewById(R.id.textViewUserName)
-        val textViewCountry: TextView = itemView.findViewById(R.id.textViewCountry)
-    }
+    private var onItemClickListener: ((Result) -> Unit)? = null
 
+    fun setOnItemClickListener(listener: (Result) -> Unit) {
+        onItemClickListener = listener
+    }
 }

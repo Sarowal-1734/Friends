@@ -1,12 +1,12 @@
-package com.example.friends.ui.fragments.user_details
+package com.example.friends.ui.fragments
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.example.friends.databinding.FragmentUserDetailsBinding
@@ -15,7 +15,11 @@ class UserDetailsFragment : Fragment() {
 
     private lateinit var binding: FragmentUserDetailsBinding
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         // Inflate the layout for this fragment
         binding = FragmentUserDetailsBinding.inflate(inflater, container, false)
 
@@ -26,9 +30,9 @@ class UserDetailsFragment : Fragment() {
         updateUI(args)
 
         // handle click event for Email
-        binding.textViewEmail.setOnClickListener(View.OnClickListener {
-            sendEmail(args.results?.email)
-        })
+        binding.textViewEmail.setOnClickListener {
+            sendEmail(args.result.email)
+        }
 
         return binding.root
     }
@@ -36,31 +40,31 @@ class UserDetailsFragment : Fragment() {
     // Open mail app on click email
     private fun sendEmail(email: String?) {
         val emailIntent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$email"))
-        startActivity(Intent.createChooser(emailIntent, "title here"));
+        startActivity(Intent.createChooser(emailIntent, "title here"))
     }
 
     // Display User Info
     private fun updateUI(args: UserDetailsFragmentArgs) {
         binding.apply {
             // Extracting portrait from args
-            val portrait = args.results?.picture?.large
+            val portrait = args.result.picture.large
             // Extracting full name from args
-            val title = args.results?.name?.title
-            val firstName = args.results?.name?.first
-            val lastName = args.results?.name?.last
+            val title = args.result.name.title
+            val firstName = args.result.name.first
+            val lastName = args.result.name.last
             val fullName = "$title  $firstName $lastName"
             // Extracting cell from args
-            val cell = args.results?.cell
+            val cell = args.result.cell
             // Extracting phone from args
-            val phone = args.results?.phone
+            val phone = args.result.phone
             // Extracting email from args
-            val email = args.results?.email
+            val email = args.result.email
             // Extracting city from args
-            val city = args.results?.location?.city
+            val city = args.result.location.city
             // Extracting state from args
-            val state = args.results?.location?.state
+            val state = args.result.location.state
             // Extracting country from args
-            val country = args.results?.location?.country
+            val country = args.result.location.country
 
             // Display extracted data to the view
             Glide.with(this@UserDetailsFragment).load(portrait).into(imageViewPortrait)
@@ -73,5 +77,4 @@ class UserDetailsFragment : Fragment() {
             textViewCountry.text = "Country: $country"
         }
     }
-
 }

@@ -1,14 +1,28 @@
 package com.example.friends.api
 
+import com.example.friends.util.Constants.Companion.BASE_URL
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitInstance {
-    val api: Api by lazy {
-        Retrofit.Builder()
-            .baseUrl("https://randomuser.me")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(Api::class.java)
+class RetrofitInstance {
+    companion object {
+        private val retrofit by lazy {
+            val logging = HttpLoggingInterceptor()
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+            val client = OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build()
+            Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build()
+        }
+
+        val api by lazy {
+            retrofit.create(UserApi::class.java)
+        }
     }
 }
